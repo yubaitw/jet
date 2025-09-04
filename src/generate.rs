@@ -48,7 +48,7 @@ pub fn create_homepage_html_file(articles: Articles, output_dir_path: Path, is_p
         (output_dir_path + "index.html").to_string(),
         create_homepage_html(
             articles,
-            read_template_from_file("templates/homepage.html".to_string()),
+            read_file_content("templates/homepage.html".to_string()),
             is_production
         ),
     )?;
@@ -136,7 +136,7 @@ pub fn create_article_html_file(
     }
     fs::write(
         String::from(output_dir_path + &(article.slug.clone() + ".html")),
-        convert_article_to_html(&read_template_from_file(article_template_path), article),
+        convert_article_to_html(&read_file_content(article_template_path), article),
     )?;
     Ok(())
 }
@@ -185,7 +185,7 @@ pub fn get_all_articles(article_filepaths: Vec<Path>) -> Vec<Article> {
 }
 
 fn read_article_from_file(article_filepath: Path) -> Article {
-    let file_contents = fs::read_to_string(article_filepath).unwrap();
+    let file_contents = read_file_content(article_filepath);
     let (frontmatter, body) = markdown_frontmatter::parse::<Frontmatter>(&file_contents).unwrap();
     let compile_options = markdown::CompileOptions {
         allow_dangerous_html: true,
@@ -206,8 +206,16 @@ fn read_article_from_file(article_filepath: Path) -> Article {
     return article;
 }
 
-pub fn read_template_from_file(template_filepath: Path) -> String {
-    let contents = fs::read_to_string(template_filepath).unwrap();
+pub fn read_file_content(filepath: Path) -> String {
+    let contents = match fs::read_to_string(filepath) {
+        Ok(contents) => {
+            contents
+        }
+        Err(_e) => {
+           panic!("File doesn't exist.") 
+        }
+    };
+
     return contents;
 }
 
