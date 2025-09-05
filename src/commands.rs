@@ -84,12 +84,12 @@ pub fn build_site(output_dir: generate::Path) {
 
 pub fn create_article(article_slug: String) -> io::Result<()> {
     let article_template = format!(
-        "---\n \
-         title: \"\"\n \
-         date: \"{}\"\n \
-         slug: \"{}\"\n \
-         draft: true\n \
-         description: \"\"\n \
+        "---\n\
+         title: \"\"\n\
+         date: \"{}\"\n\
+         slug: \"{}\"\n\
+         draft: true\n\
+         description: \"\"\n\
          ---",
         chrono::Local::now().format("%Y-%m-%d"),
         article_slug
