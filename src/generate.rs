@@ -46,8 +46,11 @@ pub fn create_homepage_html_file(articles: Articles, output_dir_path: Path, is_p
         fs::create_dir(&output_dir_path)?;
     }
 
+    let mut homepage_html_filename = path::PathBuf::from(output_dir_path);
+    homepage_html_filename.push("index.html");
+
     fs::write(
-        (output_dir_path + "index.html").to_string(),
+        homepage_html_filename.to_str().unwrap(),
         create_homepage_html(
             articles,
             read_file_content("templates/homepage.html".to_string()),
@@ -131,13 +134,17 @@ fn create_year_archives(articles: Articles, is_production: bool) -> YearArchives
 pub fn create_article_html_file(
     article: &Article,
     article_template_path: Path,
-    output_dir_path: Path,
+    output_dir: Path,
 ) -> io::Result<()> {
-    if !path::Path::new(&output_dir_path).is_dir() {
-        create_dir(&output_dir_path)?;
+    if !path::Path::new(&output_dir).is_dir() {
+        create_dir(&output_dir)?;
     }
+
+    let mut output_dir_path = path::PathBuf::from(output_dir);
+    output_dir_path.push(&(article.slug.clone() + ".html"));
+
     fs::write(
-        String::from(output_dir_path + &(article.slug.clone() + ".html")),
+        output_dir_path.to_str().unwrap(),
         convert_article_to_html(&read_file_content(article_template_path), article),
     )?;
     Ok(())
@@ -177,7 +184,7 @@ pub fn get_article_filepaths(article_directory: &str) -> io::Result<Vec<Path>> {
 }
 
 pub fn get_all_articles(article_filepaths: Vec<Path>) -> Vec<Article> {
-    let mut articles: Vec<Article> = vec![];
+    let mut articles: Articles = vec![];
 
     for article_filepath in article_filepaths {
         articles.push(read_article_from_file(article_filepath));

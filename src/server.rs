@@ -1,4 +1,4 @@
-use crate::generate::{self, convert_article_to_html, read_template_from_file};
+use crate::generate::{self, convert_article_to_html, read_file_content};
 use axum::{routing::get, Router, extract::Path, response::Html};
 use tower_http::services::ServeDir;
 
@@ -22,7 +22,7 @@ async fn get_homepage() -> Html<String> {
     };
 
     let articles = generate::get_all_articles(article_filepaths.clone());
-    let homepage_template = generate::read_template_from_file("templates/homepage.html".to_string());
+    let homepage_template = generate::read_file_content("templates/homepage.html".to_string());
     let is_production = false;
     let homepage_html = generate::create_homepage_html(articles, homepage_template, is_production);
 
@@ -41,7 +41,7 @@ async fn get_article(Path(article_slug): Path<String>) -> Html<String> {
     let articles = generate::get_all_articles(article_filepaths.clone());
 
     if let Some(article) = articles.iter().find(|a| a.slug == article_slug) {
-        Html(convert_article_to_html(&read_template_from_file("./templates/article.html".to_string()), article))
+        Html(convert_article_to_html(&read_file_content("./templates/article.html".to_string()), article))
     } else {
         Html("Not Found".to_string())
     }
