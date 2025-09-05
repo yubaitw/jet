@@ -37,7 +37,13 @@ pub fn build_site() {
 
 pub fn create_article(article_slug: String) -> io::Result<()> {
     let article_template = format!(
-        "---\ntitle: \"\"\ndate: \"{}\"\nslug: \"{}\"\ndraft: true\n---",
+        "---\n \
+         title: \"\"\n \
+         date: \"{}\"\n \
+         slug: \"{}\"\n \
+         draft: true\n \
+         description: \"\"\n \
+         ---",
         chrono::Local::now().format("%Y-%m-%d"),
         article_slug
     );

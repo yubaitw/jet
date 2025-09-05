@@ -18,6 +18,7 @@ pub struct Article {
     pub content: String,
     pub slug: String,
     pub draft: bool,
+    pub description: String,
 }
 
 pub type Path = String;
@@ -37,6 +38,7 @@ struct Frontmatter {
     date: String,
     slug: String,
     draft: bool,
+    description: String,
 }
 
 pub fn create_homepage_html_file(articles: Articles, output_dir_path: Path, is_production: bool) -> io::Result<()> {
@@ -148,12 +150,12 @@ pub fn convert_article_to_html(article_html_template: &str, article: &Article) -
     let tmpl = env.get_template("article").unwrap();
 
     return tmpl
-        .render(context! { title => article.title, content => article.content })
+        .render(context! { title => article.title, content => article.content, description => article.description })
         .unwrap();
 }
 
-pub fn get_article_filepaths(article_directory: &str) -> io::Result<Vec<String>> {
-    let mut article_filepaths: Vec<String> = vec![];
+pub fn get_article_filepaths(article_directory: &str) -> io::Result<Vec<Path>> {
+    let mut article_filepaths: Vec<Path> = vec![];
 
     for entry in fs::read_dir(article_directory)? {
         let entry = entry?;
@@ -202,6 +204,7 @@ fn read_article_from_file(article_filepath: Path) -> Article {
         content: markdown::to_html_with_options(body, &options).unwrap(),
         slug: frontmatter.slug,
         draft: frontmatter.draft,
+        description: frontmatter.description,
     };
     return article;
 }
