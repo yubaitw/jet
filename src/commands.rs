@@ -5,6 +5,14 @@ use std::fs;
 use std::io;
 use std::path;
 
+const DEFAULT_ARTICLE_TEMPLATE: &str = "---\n\
+     title: \"\"\n\
+     date: \"{date}\"\n\
+     slug: \"{slug}\"\n\
+     draft: true\n\
+     description: \"\"\n\
+     ---";
+
 pub fn execute_commnads(command: &str, argc: usize, args: Vec<String>) {
     match command {
         "build" => {
@@ -83,18 +91,11 @@ pub fn build_site(output_dir: generate::Path) {
 }
 
 pub fn create_article(article_slug: String) -> io::Result<()> {
-    let article_template = format!(
-        "---\n\
-         title: \"\"\n\
-         date: \"{}\"\n\
-         slug: \"{}\"\n\
-         draft: true\n\
-         description: \"\"\n\
-         ---",
-        chrono::Local::now().format("%Y-%m-%d"),
-        article_slug
-    );
-    fs::write(format!("articles/{}.md", article_slug), article_template)?;
+    let article_content = DEFAULT_ARTICLE_TEMPLATE
+        .replace("{date}", chrono::Local::now().format("%Y-%m-%d").to_string().as_str())
+        .replace("{slug}", article_slug.as_str());
+
+    fs::write(format!("articles/{}.md", article_slug), article_content)?;
     println!("Create article: articles/{}.md", article_slug.clone());
     Ok(())
 }
