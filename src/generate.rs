@@ -202,7 +202,7 @@ fn read_article_from_file(article_filepath: Path) -> Article {
     };
     let options = markdown::Options {
         compile: compile_options,
-        ..markdown::Options::default()
+        ..markdown::Options::gfm()
     };
     let article = Article {
         title: frontmatter.title,
