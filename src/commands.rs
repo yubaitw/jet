@@ -1,5 +1,6 @@
 use crate::generate;
 use crate::server;
+use crate::helper;
 use chrono;
 use std::fs;
 use std::io;
@@ -56,17 +57,11 @@ pub fn execute_commnads(command: &str, argc: usize, args: Vec<String>) {
 }
 
 pub fn build_site(output_dir: generate::Path) {
-    let article_filepaths: Vec<generate::Path> = match generate::get_article_filepaths("./articles")
-    {
-        Ok(paths) => paths,
-        Err(e) => {
-            panic!("{}", e);
-        }
-    };
-
-    let articles = generate::get_all_articles(article_filepaths.clone());
+    let articles_directory = "./articles".to_string();
+    let articles = generate::get_articles(articles_directory.clone());
     let _ = generate::create_homepage_html_file(articles, output_dir.clone(), true);
-    let articles = generate::get_all_articles(article_filepaths);
+    let articles = generate::get_articles(articles_directory.clone());
+
     for article in articles {
         if !article.draft {
             let mut output_dir_path = path::PathBuf::from(&output_dir);
@@ -85,7 +80,7 @@ pub fn build_site(output_dir: generate::Path) {
         }
     }
 
-    generate::copy_assets_to_output_dir("assets/", output_dir.as_str());
+    helper::copy_assets_to_output_dir("assets/", output_dir.as_str());
 
     println!("Site was generated successfully.");
 }

@@ -10,6 +10,7 @@ use std::fs;
 use std::fs::create_dir;
 use std::io;
 use std::path;
+use crate::helper;
 
 #[derive(serde::Serialize)]
 pub struct Article {
@@ -53,38 +54,10 @@ pub fn create_homepage_html_file(articles: Articles, output_dir_path: Path, is_p
         homepage_html_filename.to_str().unwrap(),
         create_homepage_html(
             articles,
-            read_file_content("templates/homepage.html".to_string()),
+            helper::read_file_content("templates/homepage.html".to_string()),
             is_production
         ),
     )?;
-
-    Ok(())
-}
-
-pub fn copy_assets_to_output_dir(assets_path: &str, output_dir_path: &str) {
-    if path::Path::new(&assets_path).is_dir() {
-       let _ = copy_files_in_dir_to_dst(assets_path, output_dir_path);
-    }
-}
-
-fn copy_files_in_dir_to_dst(src_dir: &str, dst_dir: &str) -> io::Result<()> {
-    fs::create_dir_all(dst_dir)?;
-
-    for entry in fs::read_dir(&src_dir)? {
-        let entry = entry?;
-        let path = entry.path();
-
-        if path.is_file() {
-            let file_name = entry.file_name();
-            let dest_path = path::Path::new(&dst_dir).join(file_name);
-            fs::copy(&path, &dest_path)?;
-        } else if path.is_dir() {
-            println!("{}", path.to_str().unwrap());
-            let _dst_dir = path::Path::new(&dst_dir).join(entry.file_name());
-            fs::create_dir_all(&_dst_dir)?;
-            let _ = copy_files_in_dir_to_dst(&path.to_str().unwrap(), _dst_dir.to_str().unwrap());
-        }
-    }
 
     Ok(())
 }
@@ -145,7 +118,7 @@ pub fn create_article_html_file(
 
     fs::write(
         output_dir_path.to_str().unwrap(),
-        convert_article_to_html(&read_file_content(article_template_path), article),
+        convert_article_to_html(&helper::read_file_content(article_template_path), article),
     )?;
     Ok(())
 }
@@ -161,7 +134,18 @@ pub fn convert_article_to_html(article_html_template: &str, article: &Article) -
         .unwrap();
 }
 
-pub fn get_article_filepaths(article_directory: &str) -> io::Result<Vec<Path>> {
+pub fn get_articles(articles_directory: Path) -> Vec<Article> {
+    let mut articles: Articles = vec![];
+    let article_filepaths = get_article_filepaths(&articles_directory).unwrap();
+
+    for article_filepath in article_filepaths {
+        articles.push(read_article_from_file(article_filepath));
+    }
+
+    return articles;
+}
+
+fn get_article_filepaths(article_directory: &str) -> io::Result<Vec<Path>> {
     let mut article_filepaths: Vec<Path> = vec![];
 
     for entry in fs::read_dir(article_directory)? {
@@ -183,18 +167,9 @@ pub fn get_article_filepaths(article_directory: &str) -> io::Result<Vec<Path>> {
     return Ok(article_filepaths);
 }
 
-pub fn get_all_articles(article_filepaths: Vec<Path>) -> Vec<Article> {
-    let mut articles: Articles = vec![];
-
-    for article_filepath in article_filepaths {
-        articles.push(read_article_from_file(article_filepath));
-    }
-
-    return articles;
-}
 
 fn read_article_from_file(article_filepath: Path) -> Article {
-    let file_contents = read_file_content(article_filepath);
+    let file_contents = helper::read_file_content(article_filepath);
     let (frontmatter, body) = markdown_frontmatter::parse::<Frontmatter>(&file_contents).unwrap();
     let compile_options = markdown::CompileOptions {
         allow_dangerous_html: true,
@@ -214,21 +189,4 @@ fn read_article_from_file(article_filepath: Path) -> Article {
         description: frontmatter.description,
     };
     return article;
-}
-
-pub fn read_file_content(filepath: Path) -> String {
-    let contents = match fs::read_to_string(filepath) {
-        Ok(contents) => {
-            contents
-        }
-        Err(_e) => {
-           panic!("File doesn't exist.") 
-        }
-    };
-
-    return contents;
-}
-
-pub fn check_is_root(directory_path: Path) -> bool {
-    return path::Path::new(&(directory_path + "jet.toml")).is_file();
 }

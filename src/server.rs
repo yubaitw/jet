@@ -1,4 +1,5 @@
-use crate::generate::{self, convert_article_to_html, read_file_content};
+use crate::generate::{self, convert_article_to_html};
+use crate::helper;
 use axum::{routing::get, Router, extract::Path, response::Html};
 use tower_http::services::ServeDir;
 
@@ -14,15 +15,9 @@ pub async fn start_server() {
 }
 
 async fn get_homepage() -> Html<String> {
-    let article_filepaths: Vec<generate::Path> = match generate::get_article_filepaths("./articles") {
-        Ok(paths) => paths,
-        Err(e) => {
-            panic!("{}", e);
-        }
-    };
-
-    let articles = generate::get_all_articles(article_filepaths.clone());
-    let homepage_template = generate::read_file_content("templates/homepage.html".to_string());
+    let articles_directory = "./articles".to_string();
+    let articles = generate::get_articles(articles_directory);
+    let homepage_template = helper::read_file_content("templates/homepage.html".to_string());
     let is_production = false;
     let homepage_html = generate::create_homepage_html(articles, homepage_template, is_production);
 
@@ -30,18 +25,11 @@ async fn get_homepage() -> Html<String> {
 }
 
 async fn get_article(Path(article_slug): Path<String>) -> Html<String> {
-     // Build the router with a single route
-    let article_filepaths: Vec<generate::Path> = match generate::get_article_filepaths("./articles") {
-        Ok(paths) => paths,
-        Err(e) => {
-            panic!("{}", e);
-        }
-    };
-
-    let articles = generate::get_all_articles(article_filepaths.clone());
+        let articles_directory = "./articles".to_string();
+    let articles = generate::get_articles(articles_directory);
 
     if let Some(article) = articles.iter().find(|a| a.slug == article_slug) {
-        Html(convert_article_to_html(&read_file_content("./templates/article.html".to_string()), article))
+        Html(convert_article_to_html(&helper::read_file_content("./templates/article.html".to_string()), article))
     } else {
         Html("Not Found".to_string())
     }
