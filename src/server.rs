@@ -1,4 +1,5 @@
-use crate::generate::{self, convert_article_to_html};
+use crate::generate;
+use crate::articles::{get_articles, convert_article_to_html};
 use crate::helper;
 use axum::{routing::get, Router, extract::Path, response::Html};
 use tower_http::services::ServeDir;
@@ -18,7 +19,7 @@ pub async fn start_server() {
 
 async fn get_homepage() -> Html<String> {
     let articles_directory = "./articles".to_string();
-    let articles = generate::get_articles(articles_directory);
+    let articles = get_articles(articles_directory);
     let homepage_template = helper::read_file_content("templates/homepage.html".to_string());
     let is_production = false;
     let homepage_html = generate::create_homepage_html(articles, homepage_template, is_production);
@@ -28,7 +29,7 @@ async fn get_homepage() -> Html<String> {
 
 async fn get_article(Path(article_slug): Path<String>) -> Html<String> {
     let articles_directory = "./articles".to_string();
-    let articles = generate::get_articles(articles_directory);
+    let articles = get_articles(articles_directory);
 
     if let Some(article) = articles.iter().find(|a| a.slug == article_slug) {
         Html(convert_article_to_html(&helper::read_file_content("./templates/article.html".to_string()), article))

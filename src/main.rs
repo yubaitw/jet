@@ -3,6 +3,7 @@ mod commands;
 mod generate;
 mod server;
 mod helper;
+mod articles;
 
 fn main() {
     let current_directory = String::from("./");
