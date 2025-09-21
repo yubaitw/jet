@@ -1,5 +1,7 @@
 use crate::articles;
 use crate::generate;
+use crate::blog;
+use crate::rss;
 use crate::server;
 use crate::helper;
 use chrono;
@@ -59,16 +61,22 @@ pub fn execute_commnads(command: &str, argc: usize, args: Vec<String>) {
 
 pub fn build_site(output_dir: generate::Path) {
     let articles_directory = "./articles".to_string();
-    let articles = generate::get_articles(articles_directory.clone());
+
+    let blog = blog::Blog {
+        config: blog::read_blog_config("jet.toml".to_string()),
+        articles: articles::get_articles(articles_directory.clone())
+    };
+
+    let articles = articles::get_articles(articles_directory.clone());
     let _ = generate::create_homepage_html_file(articles, output_dir.clone(), true);
-    let articles = generate::get_articles(articles_directory.clone());
+    let articles = articles::get_articles(articles_directory.clone());
 
     for article in articles {
         if !article.draft {
             let mut output_dir_path = path::PathBuf::from(&output_dir);
             output_dir_path.push("posts/");
 
-            match generate::create_article_html_file(
+            match articles::create_article_html_file(
                 &article,
                 "templates/article.html".to_string(),
                 output_dir_path.to_str().unwrap().to_string(),
@@ -82,6 +90,7 @@ pub fn build_site(output_dir: generate::Path) {
     }
 
     helper::copy_assets_to_output_dir("assets/", output_dir.as_str());
+    rss::create_rss_xml(&blog, output_dir);
 
     println!("Site was generated successfully.");
 }

@@ -4,6 +4,8 @@ mod generate;
 mod server;
 mod helper;
 mod articles;
+mod rss;
+mod blog;
 
 fn main() {
     let current_directory = String::from("./");
