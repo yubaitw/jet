@@ -1,13 +1,10 @@
-use chrono;
-use chrono::Datelike;
+use chrono::{NaiveDate, Datelike};
 use markdown;
-use markdown::CompileOptions;
 use markdown_frontmatter;
 use minijinja::{context, Environment};
 use serde;
 use std::collections::HashMap;
 use std::fs;
-use std::fs::create_dir;
 use std::io;
 use std::path;
 use crate::helper;
@@ -15,7 +12,7 @@ use crate::helper;
 #[derive(serde::Serialize)]
 pub struct Article {
     pub title: String,
-    pub date: chrono::NaiveDate,
+    pub date: NaiveDate,
     pub content: String,
     pub slug: String,
     pub draft: bool,
@@ -59,7 +56,7 @@ pub fn create_homepage_html_file(articles: Articles, output_dir_path: Path, is_p
         ),
     )?;
 
-    Ok(())
+    return Ok(());
 }
 
 pub fn create_homepage_html(articles: Articles, homepage_template: String, is_production: bool) -> String {
@@ -110,7 +107,7 @@ pub fn create_article_html_file(
     output_dir: Path,
 ) -> io::Result<()> {
     if !path::Path::new(&output_dir).is_dir() {
-        create_dir(&output_dir)?;
+        fs::create_dir(&output_dir)?;
     }
 
     let mut output_dir_path = path::PathBuf::from(output_dir);
@@ -120,7 +117,7 @@ pub fn create_article_html_file(
         output_dir_path.to_str().unwrap(),
         convert_article_to_html(&helper::read_file_content(article_template_path), article),
     )?;
-    Ok(())
+    return Ok(())
 }
 
 pub fn convert_article_to_html(article_html_template: &str, article: &Article) -> String {
@@ -173,7 +170,7 @@ fn read_article_from_file(article_filepath: Path) -> Article {
     let (frontmatter, body) = markdown_frontmatter::parse::<Frontmatter>(&file_contents).unwrap();
     let compile_options = markdown::CompileOptions {
         allow_dangerous_html: true,
-        ..CompileOptions::default()
+        ..markdown::CompileOptions::default()
     };
     let options = markdown::Options {
         compile: compile_options,

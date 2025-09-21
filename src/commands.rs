@@ -92,7 +92,7 @@ pub fn create_article(article_slug: String) -> io::Result<()> {
 
     fs::write(format!("articles/{}.md", article_slug), article_content)?;
     println!("Create article: articles/{}.md", article_slug.clone());
-    Ok(())
+    return Ok(());
 }
 
 pub fn serve() {
