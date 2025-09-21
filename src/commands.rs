@@ -64,12 +64,13 @@ pub fn build_site(output_dir: generate::Path) {
 
     let blog = blog::Blog {
         config: blog::read_blog_config("jet.toml".to_string()),
-        articles: articles::get_articles(articles_directory.clone())
+        articles: articles::get_articles(&articles_directory)
     };
 
-    let articles = articles::get_articles(articles_directory.clone());
-    let _ = generate::create_homepage_html_file(articles, output_dir.clone(), true);
-    let articles = articles::get_articles(articles_directory.clone());
+    let articles = articles::get_articles(&articles_directory);
+
+    let _ = generate::create_homepage_html_file(articles, &output_dir, true);
+    let articles = articles::get_articles(&articles_directory);
 
     for article in articles {
         if !article.draft {
@@ -89,7 +90,7 @@ pub fn build_site(output_dir: generate::Path) {
         }
     }
 
-    helper::copy_assets_to_output_dir("assets/", output_dir.as_str());
+    helper::copy_assets_to_output_dir("assets/", &output_dir);
     rss::create_rss_xml(&blog, output_dir);
 
     println!("Site was generated successfully.");

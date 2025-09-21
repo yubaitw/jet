@@ -28,7 +28,7 @@ struct Frontmatter {
     description: String,
 }
 
-pub fn get_articles(articles_directory: Path) -> Articles {
+pub fn get_articles(articles_directory: &Path) -> Articles {
     let mut articles: Articles = vec![];
     let article_filepaths = get_article_filepaths(&articles_directory).unwrap();
 

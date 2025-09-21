@@ -17,7 +17,7 @@ struct YearArchive {
 
 type YearArchives = HashMap<i32, YearArchive>;
 
-pub fn create_homepage_html_file(articles: Articles, output_dir_path: Path, is_production: bool) -> io::Result<()> {
+pub fn create_homepage_html_file(articles: Articles, output_dir_path: &Path, is_production: bool) -> io::Result<()> {
     if !path::Path::new(&output_dir_path).is_dir() {
         fs::create_dir(&output_dir_path)?;
     }
